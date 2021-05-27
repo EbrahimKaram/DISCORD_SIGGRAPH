@@ -1,3 +1,4 @@
+import pandas as pd
 from discord.ext import commands
 
 # Resource: https://realpython.com/how-to-make-a-discord-bot-python/
@@ -28,8 +29,10 @@ async def ping(ctx):
 
 # PRINT OUT EXISTING CHANNELS
 
-# DELETES all the channels in the systme
+# DELETES all the channels in the system
 # TODO: we might need to be careful about which server we delete the channels and specify the ID
+
+
 @bot.command(name='purge', description='delete every channel here in this system', brief='DELETE EVERYTHING')
 async def purge(ctx):
     for channel in bot.get_all_channels():
@@ -39,11 +42,12 @@ async def purge(ctx):
 
 
 # Read from CSV
-
+@bot.command(name='create_from_CSV', description='delete every channel here in this system', brief='DELETE EVERYTHING')
+async def createFromCSV(ctx):
+    df = pd.read_csv("..\s2020_sessions_Test.csv")
 
 # Commands don't work when this is set
 # @bot.event
 # async def on_message(message):
 #     print('Message from {0.author}: {0.content}'.format(message))
-
 bot.run(TOKEN)
