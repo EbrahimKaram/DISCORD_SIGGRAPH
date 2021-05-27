@@ -49,7 +49,17 @@ async def createFromCSV(ctx):
 
     for event_type in df["Event Types"].unique():
         await bot.guilds[0].create_category(event_type)
-    
+    await ctx.send('created all the categories!')
+
+    df["Reduced_sessionTitle"] = df['Session Title'].str.strip().str[:20]
+
+    for index, row in df.iterrows():
+        # print(row['Reduced_sessionTitle'], row['Event Types'])
+        category = discord.utils.get(
+            bot.guilds[0].categories, name=row['Event Types'])
+        # We can't have more than 50 channels in category
+        if len(category.channels)<50:
+            await bot.guilds[0].create_text_channel(row['Reduced_sessionTitle'], category=category)
     await ctx.send('All channels and categories are created from CSV!!!')
 
 

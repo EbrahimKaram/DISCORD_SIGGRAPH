@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     # TODO: get all categories and print them
     # There are 23 categories
-    df["Event Types"].unique()
+    df["Reduced_sessionTitle"].unique()
     
 
 
