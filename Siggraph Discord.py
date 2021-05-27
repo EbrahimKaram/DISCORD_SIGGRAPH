@@ -1,3 +1,4 @@
+import discord
 import pandas as pd
 from discord.ext import commands
 
@@ -38,13 +39,19 @@ async def purge(ctx):
     for channel in bot.get_all_channels():
         print(channel.name)
         await channel.delete()
-    await ctx.send('All channels are gone!!!')
+    await ctx.send('All channels and categories are gone!!!')
 
 
 # Read from CSV
-@bot.command(name='create_from_CSV', description='delete every channel here in this system', brief='DELETE EVERYTHING')
+@bot.command(name='create_from_CSV', description='create channels and categories from CSV', brief='starts the new world ')
 async def createFromCSV(ctx):
     df = pd.read_csv("..\s2020_sessions_Test.csv")
+
+    for event_type in df["Event Types"].unique():
+        await bot.guilds[0].create_category(event_type)
+    
+    await ctx.send('All channels and categories are created from CSV!!!')
+
 
 # Commands don't work when this is set
 # @bot.event
