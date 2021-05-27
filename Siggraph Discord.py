@@ -38,6 +38,7 @@ async def purge(ctx):
     await ctx.send('All channels are gone!!!')
 
 
+# Read from CSV
 
 
 # Commands don't work when this is set
