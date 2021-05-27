@@ -16,6 +16,10 @@ This is referred to as a “server” in the official Discord UI.
 ## Channel name
 They can't have spaces. There is no obvious character limit but we will make them 20 characters long at max
 
+The maximum number of categories for a server is 50 and the maximum number of channels in total is 500.
+
+You can only have at max 50 channels per category
+
 
 # EXTRA
 Review progress via the Trello board

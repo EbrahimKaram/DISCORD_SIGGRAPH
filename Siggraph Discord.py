@@ -37,7 +37,7 @@ async def ping(ctx):
 @bot.command(name='purge', description='delete every channel here in this system', brief='DELETE EVERYTHING')
 async def purge(ctx):
     for channel in bot.get_all_channels():
-        print(channel.name)
+        # print(channel.name)
         await channel.delete()
     await ctx.send('All channels and categories are gone!!!')
 
