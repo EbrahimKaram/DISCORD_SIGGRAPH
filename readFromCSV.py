@@ -2,7 +2,7 @@ import pandas as pd
 
 
 if __name__ == '__main__':
-    df = pd.read_csv("..\s2020_sessions_Test.csv")
+    df = pd.read_csv("..\s2021_sessions.csv")
     print(df.head(5))
     print(df.columns)
     # We need to look at session Title and event type
