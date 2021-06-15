@@ -7,11 +7,17 @@ TOKEN = "ODE5MjA2NzQ4MDYxMTcxNzE0.YEjPvA.x-6BuQMpS0AcVK2fQnhP5DjBi20"
 
 bot = commands.Bot(command_prefix='!')
 
+# This is the ID for Test_S2021
+guild_id = 779464282878115880
+
 
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
     print('Logged on as {0}!'.format(bot.user.name))
+    global guild_id
+    guild_id = bot.guilds[0].id
+    print(bot.guilds[0].name, guild_id)
 
 
 @bot.command(name='create_channel', description='Create text channel Channel here', brief="Let There be Channels")
@@ -55,28 +61,33 @@ async def createFromCSV(ctx):
     await ctx.send('created all the categories!')
 
     df["Reduced_sessionTitle"] = df['Session Title'].str.strip().str[:20]
-
+    # This Format : https://discord.com/channels/779464282878115880/854343504058384424
+    df["Channel Link"] = ""
     for index, row in df.iterrows():
         # We can't have more than 50 channels in category
         if (not isinstance(row['Category'], str)) or (len(categories[row['Category']].channels) < 50):
             # TODO: check for empty catagories
+            channel_id = 0
             if row["Type of Channel"] == 'Text':
                 if isinstance(row['Category'], str):
-                    await bot.guilds[0].create_text_channel(row['Reduced_sessionTitle'], category=categories[row['Category']])
+                    channel = await bot.guilds[0].create_text_channel(row['Reduced_sessionTitle'], category=categories[row['Category']])
                 else:
-                    await bot.guilds[0].create_text_channel(row['Reduced_sessionTitle'])
+                    channel = await bot.guilds[0].create_text_channel(row['Reduced_sessionTitle'])
             elif row["Type of Channel"] == 'Voice':
                 if isinstance(row['Category'], str):
-                    await bot.guilds[0].create_voice_channel(row['Reduced_sessionTitle'], category=categories[row['Category']])
+                    channel = await bot.guilds[0].create_voice_channel(row['Reduced_sessionTitle'], category=categories[row['Category']])
                 else:
-                    await bot.guilds[0].create_voice_channel(row['Reduced_sessionTitle'])
+                    channel = await bot.guilds[0].create_voice_channel(row['Reduced_sessionTitle'])
             elif row["Type of Channel"] == 'Stage':
                 # Stage channels are only available to community servers
                 if isinstance(row['Category'], str):
-                    await bot.guilds[0].create_text_channel(row['Reduced_sessionTitle'], category=categories[row['Category']])
+                    channel = await bot.guilds[0].create_text_channel(row['Reduced_sessionTitle'], category=categories[row['Category']])
                 else:
-                    await bot.guilds[0].create_text_channel(row['Reduced_sessionTitle'])
-
+                    channel = await bot.guilds[0].create_text_channel(row['Reduced_sessionTitle'])
+            channel_id = channel.id
+            row["Channel Link"] = "https://discord.com/channels/{0}/{1}".format(
+                guild_id, channel_id)
+    df.to_csv("..\s2021_sessions.csv", index=False)
     await ctx.send('All channels and categories are created from CSV!!!')
 
 
@@ -98,10 +109,12 @@ async def createInviteLinks(ctx):
 
 
 # TODO: The Command below is not working. Sending multiple delete messages back.
-@ bot.command(name='reset', description='delete everything and create again from a csv', brief='restart the world', hidden=True)
-async def createFromCSV(ctx):
+@ bot.command(name='reset', description='delete everything and create again from a csv', brief='restart the world')
+async def resetWorld(ctx):
     await purge(ctx)
     await createFromCSV(ctx)
+
+
 
 # Commands don't work when this is set
 # @bot.event
