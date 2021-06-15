@@ -115,6 +115,22 @@ async def resetWorld(ctx):
     await createFromCSV(ctx)
 
 
+@bot.command(name='export_channels', description='export channel links and names', brief='export channel links to csv')
+async def exportChannles(ctx):
+    our_guild = bot.get_guild(guild_id)
+    channels_in_guild = await our_guild.fetch_channels()
+    df = pd.DataFrame(columns=('Channel Name', 'Category', 'Type', 'link'))
+    if len(channels_in_guild) > 0:
+        for i, channel in enumerate(channels_in_guild):
+            print(channel.name, channel.category, channel.type, channel.id)
+            link = "https://discord.com/channels/{0}/{1}".format(
+                guild_id, channel.id)
+            df.loc[i] = [channel.name, channel.category, channel.type, link]
+
+    await ctx.send('All channels links have been found!')
+    df.to_csv("..\Channel info from {}.csv".format(
+        our_guild.name), index=False)
+    await ctx.send("dumped to 'Channel info from {}.csv'".format(our_guild.name))
 
 # Commands don't work when this is set
 # @bot.event
