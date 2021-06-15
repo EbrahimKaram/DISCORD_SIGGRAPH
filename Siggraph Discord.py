@@ -37,13 +37,14 @@ async def ping(ctx):
 # PRINT OUT EXISTING CHANNELS
 
 # DELETES all the channels in the system
+
 # TODO: we might need to be careful about which server we delete the channels and specify the ID
-
-
 @bot.command(name='purge', description='delete every channel here in this system', brief='DELETE EVERYTHING')
 async def purge(ctx):
-    if len(list(bot.get_all_channels())) > 0:
-        for channel in bot.get_all_channels():
+    our_guild = bot.get_guild(guild_id)
+    channels_in_guild = await our_guild.fetch_channels()
+    if len(channels_in_guild) > 0:
+        for channel in channels_in_guild:
             print(channel.name)
             await channel.delete()
     await ctx.send('All channels and categories are gone!!!')
