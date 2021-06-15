@@ -38,7 +38,7 @@ async def ping(ctx):
 
 # DELETES all the channels in the system
 
-# TODO: we might need to be careful about which server we delete the channels and specify the ID
+#we might need to be careful about which server we delete the channels and specify the ID
 @bot.command(name='purge', description='delete every channel here in this system', brief='DELETE EVERYTHING')
 async def purge(ctx):
     our_guild = bot.get_guild(guild_id)
