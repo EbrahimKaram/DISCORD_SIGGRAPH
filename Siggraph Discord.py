@@ -108,14 +108,13 @@ async def createInviteLinks(ctx):
     await ctx.send('Invitation links were created!')
 
 
-# TODO: The Command below is not working. Sending multiple delete messages back.
 @ bot.command(name='reset', description='delete everything and create again from a csv', brief='restart the world')
 async def resetWorld(ctx):
     await purge(ctx)
     await createFromCSV(ctx)
 
 
-@bot.command(name='export_channels', description='export channel links and names', brief='export channel links to csv')
+@bot.command(name='export_channels', description='export channel links, names, and categories to server', brief='export channel links to csv')
 async def exportChannles(ctx):
     our_guild = bot.get_guild(guild_id)
     channels_in_guild = await our_guild.fetch_channels()
