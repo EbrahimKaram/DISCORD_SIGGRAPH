@@ -21,6 +21,14 @@ The maximum number of categories for a server is 50 and the maximum number of ch
 You can only have at max 50 channels per category
 
 
+# Set Up the Virtual Environment
+in CMD
+`.\bot-env\Scripts\activate.bat`
+In PowerShell
+`.\bot-env\Scripts\activate.ps1`
+then install the packages from requirements.txt as such
+`pip install -r /path/to/requirements.txt`
+
 # EXTRA
 Review progress via the Trello board
 https://trello.com/b/Ss3DkzU8/discord
