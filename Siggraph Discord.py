@@ -16,7 +16,7 @@ intents.members = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-# This is the ID for Test_S2021
+# This is the ID for Test_S2021 (the server)
 guild_id = 779464282878115880
 
 
@@ -140,9 +140,15 @@ async def getMembers(ctx):
     # members = our_guild.fetch_members()
     members = our_guild.members
     print("The length of memebers from the call", len(members))
+    df = pd.DataFrame(columns=('Name', 'ID', 'Display Name', 'Status'))
+    i = 0
     for member in members:
-        print(member.name, member.id)
-        print(member.roles)
+        print(member.name, member.id, member.display_name, member.status)
+        df.loc[i] = [member.name, member.id,
+                     member.display_name, member.status]
+        i = i+1
+        # print(member.roles)
+    df.to_csv("..\Members from {}.csv".format(our_guild.name), index=False)
     await ctx.send('Rerieved all memebers')
 
 
