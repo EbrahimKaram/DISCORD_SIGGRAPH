@@ -3,9 +3,18 @@ import pandas as pd
 from discord.ext import commands
 
 # Resource: https://realpython.com/how-to-make-a-discord-bot-python/
-TOKEN = "ODE5MjA2NzQ4MDYxMTcxNzE0.YEjPvA.x-6BuQMpS0AcVK2fQnhP5DjBi20"
+TOKEN = "ODU2ODg4MjAwMzk1NjIwMzk1.YNHlUw.9Ugaav95V1rtmswvU_E3eSjyWrw"
 
-bot = commands.Bot(command_prefix='!')
+# Bot life#4006
+# ODU2ODg4MjAwMzk1NjIwMzk1.YNHlUw.9Ugaav95V1rtmswvU_E3eSjyWrw
+
+# Test_S2021_Bot#0035
+# ODE5MjA2NzQ4MDYxMTcxNzE0.YEjPvA.x-6BuQMpS0AcVK2fQnhP5DjBi20
+
+intents = discord.Intents.default()
+intents.members = True
+
+bot = commands.Bot(command_prefix='!', intents=intents)
 
 # This is the ID for Test_S2021
 guild_id = 779464282878115880
@@ -116,10 +125,25 @@ async def createInviteLinks(ctx, *args):
     await ctx.send('Invitation links were created!')
 
 
-@ bot.command(name='reset', description='delete everything and create again from a csv', brief='restart the world')
+@bot.command(name='reset', description='delete everything and create again from a csv', brief='restart the world')
 async def resetWorld(ctx):
     await purge(ctx)
     await createFromCSV(ctx)
+
+
+@bot.command(name='members', description='Gets you the members in the guild', brief='Who is in the server')
+async def getMembers(ctx):
+    our_guild = bot.get_guild(guild_id)
+    # There are 16 members
+    print("How many members are in this server", our_guild.member_count)
+    # print(our_guild.members)
+    # members = our_guild.fetch_members()
+    members = our_guild.members
+    print("The length of memebers from the call", len(members))
+    for member in members:
+        print(member.name, member.id)
+        print(member.roles)
+    await ctx.send('Rerieved all memebers')
 
 
 @bot.command(name='export_channels', description='export channel links, names, and categories to server', brief='export channel links to csv')
