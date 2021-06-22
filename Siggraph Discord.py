@@ -140,12 +140,14 @@ async def getMembers(ctx):
     # members = our_guild.fetch_members()
     members = our_guild.members
     print("The length of memebers from the call", len(members))
-    df = pd.DataFrame(columns=('Name', 'ID', 'Display Name', 'Status'))
+    df = pd.DataFrame(
+        columns=('Name', 'ID', 'Display Name', 'Status', "Joined on"))
     i = 0
     for member in members:
-        print(member.name, member.id, member.display_name, member.status)
+        print(member.name, member.id, member.display_name,
+              member.status, member.joined_at)
         df.loc[i] = [member.name, member.id,
-                     member.display_name, member.status]
+                     member.display_name, member.status, member.joined_at]
         i = i+1
         # print(member.roles)
     df.to_csv("..\Members from {}.csv".format(our_guild.name), index=False)
