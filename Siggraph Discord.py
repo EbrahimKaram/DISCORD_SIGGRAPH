@@ -3,7 +3,7 @@ import pandas as pd
 from discord.ext import commands
 
 # Resource: https://realpython.com/how-to-make-a-discord-bot-python/
-TOKEN = "ODU2ODg4MjAwMzk1NjIwMzk1.YNHlUw.9Ugaav95V1rtmswvU_E3eSjyWrw"
+TOKEN = "ODE5MjA2NzQ4MDYxMTcxNzE0.YEjPvA.x-6BuQMpS0AcVK2fQnhP5DjBi20"
 
 # Bot life#4006
 # ODU2ODg4MjAwMzk1NjIwMzk1.YNHlUw.9Ugaav95V1rtmswvU_E3eSjyWrw
@@ -141,17 +141,30 @@ async def getMembers(ctx):
     members = our_guild.members
     print("The length of memebers from the call", len(members))
     df = pd.DataFrame(
-        columns=('Name', 'ID', 'Display Name', 'Status', "Joined on"))
+        columns=('Name', 'Discriminator', 'ID', 'Display Name', 'Status', "Joined on"))
     i = 0
     for member in members:
-        print(member.name, member.id, member.display_name,
+        print(member.name, member.discriminator, member.id, member.display_name,
               member.status, member.joined_at)
-        df.loc[i] = [member.name, member.id,
+        df.loc[i] = [member.name, member.discriminator, member.id,
                      member.display_name, member.status, member.joined_at]
         i = i+1
         # print(member.roles)
     df.to_csv("..\Members from {}.csv".format(our_guild.name), index=False)
     await ctx.send('Rerieved all memebers')
+
+
+@bot.command(name='assign_roles', description='Assing the roles to the different members', brief='Tell who does what')
+async def roleAssigned(ctx):
+    our_guild = bot.get_guild(guild_id)
+    print(our_guild.roles)
+    role = discord.utils.get(our_guild.roles, name="Jedi")
+    member = discord.utils.get(
+        our_guild.members, name='Monica', discriminator="9868")
+    await member.add_roles(role)
+# discord.Member. add_roles
+
+    await ctx.send('the roles have been assigned')
 
 
 @bot.command(name='export_channels', description='export channel links, names, and categories to server', brief='export channel links to csv')
