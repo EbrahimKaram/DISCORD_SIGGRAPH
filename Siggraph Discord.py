@@ -153,15 +153,19 @@ async def getMembers(ctx):
     df.to_csv("..\Members from {}.csv".format(our_guild.name), index=False)
     await ctx.send('Rerieved all memebers')
 
-
+# TODO: find a way to reset roles if need be
+# await remove_roles(*roles, reason=None, atomic=True)
 @bot.command(name='assign_roles', description='Assing the roles to the different members', brief='Tell who does what')
 async def roleAssigned(ctx):
+    df = pd.read_csv("..\Role Assignment.csv")
+    df[["Name", "delim"]] = df["User name"].str.split("#", expand=True)
     our_guild = bot.get_guild(guild_id)
-    print(our_guild.roles)
-    role = discord.utils.get(our_guild.roles, name="Jedi")
-    member = discord.utils.get(
-        our_guild.members, name='Monica', discriminator="9868")
-    await member.add_roles(role)
+    # print(our_guild.roles)
+    for index, row in df.iterrows():
+        role = discord.utils.get(our_guild.roles, name=row["Role"])
+        member = discord.utils.get(
+        our_guild.members, name=row["Name"], discriminator=str(row["delim"]))
+        await member.add_roles(role)
 # discord.Member. add_roles
 
     await ctx.send('the roles have been assigned')
