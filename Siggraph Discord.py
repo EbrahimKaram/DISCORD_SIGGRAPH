@@ -64,7 +64,8 @@ async def purge(ctx):
 # Read from CSV
 @bot.command(name='create_from_CSV', description='create channels and categories from CSV', brief='starts the new world ')
 async def createFromCSV(ctx):
-    df = pd.read_csv("..\s2021_sessions.csv")
+    session_file = "..\s2021_sessions_2021_6_24 - s2021_sessions_2021_6_24.csv"
+    df = pd.read_csv(session_file)
     categories = {}
     for event_type in df["Category"].unique():
         if isinstance(event_type, str):
@@ -99,7 +100,7 @@ async def createFromCSV(ctx):
             channel_id = channel.id
             row["Channel Link"] = "https://discord.com/channels/{0}/{1}".format(
                 guild_id, channel_id)
-    df.to_csv("..\s2021_sessions.csv", index=False)
+    df.to_csv(session_file, index=False)
     await ctx.send('All channels and categories are created from CSV!!!')
 
 
@@ -155,6 +156,8 @@ async def getMembers(ctx):
 
 # TODO: find a way to reset roles if need be
 # await remove_roles(*roles, reason=None, atomic=True)
+
+
 @bot.command(name='assign_roles', description='Assing the roles to the different members', brief='Tell who does what')
 async def roleAssigned(ctx):
     df = pd.read_csv("..\Role Assignment.csv")
@@ -164,7 +167,7 @@ async def roleAssigned(ctx):
     for index, row in df.iterrows():
         role = discord.utils.get(our_guild.roles, name=row["Role"])
         member = discord.utils.get(
-        our_guild.members, name=row["Name"], discriminator=str(row["delim"]))
+            our_guild.members, name=row["Name"], discriminator=str(row["delim"]))
         await member.add_roles(role)
 # discord.Member. add_roles
 
