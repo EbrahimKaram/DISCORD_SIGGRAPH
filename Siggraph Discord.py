@@ -78,14 +78,18 @@ async def createFromCSV(ctx):
     df["Channel Link"] = ""
     for index, row in df.iterrows():
         # We can't have more than 50 channels in category
+        topic_to_set = str(row["Topic"]) + "\n"+str(row["Hubb Link"])
         if (not isinstance(row['Category'], str)) or (len(categories[row['Category']].channels) < 50):
             # TODO: check for empty catagories
             channel_id = 0
+      
             if row["Type of Channel"] == 'Text':
-                if isinstance(row['Category'], str):
-                    channel = await bot.guilds[0].create_text_channel(row['Reduced_sessionTitle'], category=categories[row['Category']])
+                if not (pd.isnull(row["Category"])):
+                    channel = await bot.guilds[0].create_text_channel(row['Reduced_sessionTitle'], category=categories[row['Category']], topic=topic_to_set)
                 else:
-                    channel = await bot.guilds[0].create_text_channel(row['Reduced_sessionTitle'])
+                    channel = await bot.guilds[0].create_text_channel(row['Reduced_sessionTitle'], topic=topic_to_set)
+                botmsg = await channel.send(topic_to_set)
+                await botmsg.pin()
             elif row["Type of Channel"] == 'Voice':
                 if isinstance(row['Category'], str):
                     channel = await bot.guilds[0].create_voice_channel(row['Reduced_sessionTitle'], category=categories[row['Category']])
@@ -94,9 +98,10 @@ async def createFromCSV(ctx):
             elif row["Type of Channel"] == 'Stage':
                 # Stage channels are only available to community servers
                 if isinstance(row['Category'], str):
-                    channel = await bot.guilds[0].create_text_channel(row['Reduced_sessionTitle'], category=categories[row['Category']])
+                    channel = await bot.guilds[0].create_text_channel(row['Reduced_sessionTitle'], category=categories[row['Category']],topic=topic_to_set)
                 else:
-                    channel = await bot.guilds[0].create_text_channel(row['Reduced_sessionTitle'])
+                    channel = await bot.guilds[0].create_text_channel(row['Reduced_sessionTitle'],topic=topic_to_set)
+
             channel_id = channel.id
             row["Channel Link"] = "https://discord.com/channels/{0}/{1}".format(
                 guild_id, channel_id)
