@@ -205,6 +205,22 @@ async def askForHelp(ctx, args):
     await ctx.send("Your message was forwarded to support")
 
 
+@bot.command(name='send_all', description='send Message to all channels', brief='megaphone to everyone')
+async def sendAll(ctx, args):
+    our_guild = bot.get_guild(guild_id)
+    ctx.message.author
+    members = our_guild.members
+    role_needed = discord.utils.get(our_guild.roles, name="SIGGRAPH_Chair")
+    member_in_question =discord.utils.get(our_guild.members, name=ctx.message.author.name)
+    if(role_needed in member_in_question.roles):
+        await ctx.send(f"You do have the permissions to send {args}")
+        for channel in our_guild.text_channels:
+            await channel.send(f"Announcement: {args}")
+        await ctx.send("Message has been sent to everyone")
+    else: 
+        await ctx.send("You do have permisssions to use this command")
+
+
 # Commands don't work when this is set
 # @bot.event
 # async def on_message(message):
