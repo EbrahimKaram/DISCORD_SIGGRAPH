@@ -78,7 +78,15 @@ async def createFromCSV(ctx):
     df["Channel Link"] = ""
     for index, row in df.iterrows():
         # We can't have more than 50 channels in category
-        topic_to_set = str(row["Topic"]) + "\n"+str(row["Hubb Link"])
+        topic_to_set = ""
+        if (pd.isnull(row["Hubb Link"])):
+            if not pd.isnull(row["Topic"]):
+                topic_to_set = str(row["Topic"])
+            else: 
+                topic_to_set="no Specific Topic set"
+        else:
+            topic_to_set = str(row["Topic"]) + "\n"+str(row["Hubb Link"])
+
         if (not isinstance(row['Category'], str)) or (len(categories[row['Category']].channels) < 50):
             # TODO: check for empty catagories
             channel_id = 0
@@ -211,13 +219,14 @@ async def sendAll(ctx, args):
     ctx.message.author
     members = our_guild.members
     role_needed = discord.utils.get(our_guild.roles, name="SIGGRAPH_Chair")
-    member_in_question =discord.utils.get(our_guild.members, name=ctx.message.author.name)
+    member_in_question = discord.utils.get(
+        our_guild.members, name=ctx.message.author.name)
     if(role_needed in member_in_question.roles):
         await ctx.send(f"You do have the permissions to send {args}")
         for channel in our_guild.text_channels:
             await channel.send(f"Announcement: {args}")
         await ctx.send("Message has been sent to everyone")
-    else: 
+    else:
         await ctx.send("You do have permisssions to use this command")
 
 
