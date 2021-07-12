@@ -82,8 +82,8 @@ async def createFromCSV(ctx):
         if (pd.isnull(row["Hubb Link"])):
             if not pd.isnull(row["Topic"]):
                 topic_to_set = str(row["Topic"])
-            else: 
-                topic_to_set="no Specific Topic set"
+            else:
+                topic_to_set = "no Specific Topic set"
         else:
             topic_to_set = str(row["Topic"]) + "\n"+str(row["Hubb Link"])
 
@@ -216,7 +216,6 @@ async def askForHelp(ctx, args):
 @bot.command(name='send_all', description='send Message to all channels', brief='megaphone to everyone')
 async def sendAll(ctx, args):
     our_guild = bot.get_guild(guild_id)
-    ctx.message.author
     members = our_guild.members
     role_needed = discord.utils.get(our_guild.roles, name="SIGGRAPH_Chair")
     member_in_question = discord.utils.get(
@@ -226,6 +225,34 @@ async def sendAll(ctx, args):
         for channel in our_guild.text_channels:
             await channel.send(f"Announcement: {args}")
         await ctx.send("Message has been sent to everyone")
+    else:
+        await ctx.send("You do have permisssions to use this command")
+
+# !send_to_category "the message to send" category
+
+
+@bot.command(name='send_to_category', description="send Message to all channels in catergory example:" +
+             " '!send_to_category \"the message to send\" category' ", brief='megaphone to category')
+async def sendToAll(ctx, *args):
+    our_guild = bot.get_guild(guild_id)
+    members = our_guild.members
+    role_needed = discord.utils.get(our_guild.roles, name="SIGGRAPH_Chair")
+    member_in_question = discord.utils.get(
+        our_guild.members, name=ctx.message.author.name)
+    if(role_needed in member_in_question.roles):
+        await ctx.send(f"You do have the permissions to send {args[0]}")
+        await ctx.send(f"{args[0]}")
+        await ctx.send(f"{args[1]}")
+        for category_asked in args[1:]:
+            # if our_guild.categories.exists('name', category_asked):
+            category_announce = discord.utils.get(
+                our_guild.categories, name=category_asked)
+            if category_announce is not None:
+                for channel in category_announce.channels:
+                    await channel.send(f"Announcement: {args[0]}")
+                await ctx.send(f"Message has been sent to channels in {category_asked}")
+            else:
+                ctx.send(f"{category_asked} is not a valid category")
     else:
         await ctx.send("You do have permisssions to use this command")
 
