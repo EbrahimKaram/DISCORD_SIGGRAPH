@@ -4,6 +4,7 @@ attrs==21.2.0
 autopep8==1.5.7
 chardet==4.0.0
 discord.py==1.7.2
+emoji==1.2.0
 idna==3.1
 multidict==5.1.0
 numpy==1.20.3

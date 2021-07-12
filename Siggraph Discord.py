@@ -1,6 +1,8 @@
 import discord
 import pandas as pd
 from discord.ext import commands
+from emoji import emojize
+
 
 # Resource: https://realpython.com/how-to-make-a-discord-bot-python/
 TOKEN = "ODE5MjA2NzQ4MDYxMTcxNzE0.YEjPvA.x-6BuQMpS0AcVK2fQnhP5DjBi20"
@@ -83,7 +85,7 @@ async def createFromCSV(ctx):
             if not pd.isnull(row["Topic"]):
                 topic_to_set = str(row["Topic"])
             else:
-                topic_to_set = "no Specific Topic set"
+                topic_to_set = "No Specific Topic set"
         else:
             topic_to_set = str(row["Topic"]) + "\n"+str(row["Hubb Link"])
 
@@ -256,6 +258,38 @@ async def sendToAll(ctx, *args):
     else:
         await ctx.send("You do have permisssions to use this command")
 
+
+@bot.command(name='send_role_messages', description="send the role messages from the csv to assign roles", brief='messages to help assign roles')
+async def sendRoleMessages(ctx):
+    our_guild = bot.get_guild(guild_id)
+    df = pd.read_csv("..\Channels, Categories, and Roles - Roles.csv")
+
+    welcome_channel = discord.utils.get(
+        our_guild.channels, name="welcome-page")
+
+    for column in df.columns:
+        message = ""
+        message += column+" Roles \n"
+        df_temp = df[column]
+        emojis = []
+        for i in range(len(df_temp)):
+            if not pd.isnull(df_temp.iloc[i]):
+                words_roles = df_temp.iloc[i].split(':')[:2]
+                if len(words_roles) > 1:
+                    emojis.append(":"+words_roles[1] + ":")
+                    message += words_roles[0] + ":"+words_roles[1] + ":" + "\n"
+                else:
+                    message += df_temp.iloc[i]+"\n"
+        # TODO: do some role reactions to messaages
+
+        # TODO: add bot reactions to message. Need to have an automated way to find emoji ID. So the bot can react to message
+        messaage_sent = await welcome_channel.send(message)
+        # for emoji in emojis:
+        #     # emoji_object = discord.utils.get(our_guild.emojis, name=emoji)
+        #     emoji_object = emojize(emoji)
+        #     print(emoji_object)
+        #     await messaage_sent.add_reaction(emoji_object)
+    await ctx.send("Sent the role messages")
 
 # Commands don't work when this is set
 # @bot.event
