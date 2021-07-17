@@ -121,20 +121,24 @@ async def createFromCSV(ctx):
 
 @ bot.command(name='create_links', description='create links for all the participants', brief='create invite links')
 async def createInviteLinks(ctx, *args):
-    email_csv = "..\Registrion_Emails.csv"
-    emails = pd.read_csv(email_csv)
+    email_csv = "..\Invitation_links.csv"
+    emails = pd.DataFrame(columns=['Numbers', 'Invitation links'])
+    our_guild = bot.get_guild(guild_id)
+    number_of_links = 10
     if ((len(args) > 0) and args[0].isdigit()):
         print(args[0])
-
-        emails["Numbers"] = pd.Series(range(1, int(args[0])+1))
+        number_of_links = int(args[0])
+        
+    emails["Numbers"] = pd.Series(range(1, number_of_links+1))
     emails["Invitation links"] = ""
     # TODO use args to parse number of emails
     for index, row in emails.iterrows():
         print(row['Numbers'])
+        # TODO: set the expiration time for the link to be
         # Reference: https://discordpy.readthedocs.io/en/latest/api.html?highlight=create_invite#discord.abc.GuildChannel.create_invite
         # ASSUMPTION: The link should not expire but is allowed to be used only once
         # Email is not needed
-        invite = await bot.guilds[0].channels[0].create_invite(max_age=0, max_uses=5)
+        invite = await our_guild.channels[0].create_invite(max_age=0, max_uses=5)
         emails.at[index, "Invitation links"] = invite.url
         print(invite.url)
     emails.to_csv(email_csv, index=False)

@@ -22,12 +22,26 @@ You can only have at max 50 channels per category
 
 
 # Set Up the Virtual Environment
+To create a virtual environment
+`python3 -m venv .\bot-env`
+
+Activate using the following
 in CMD
 `.\bot-env\Scripts\activate.bat`
 In PowerShell
 `.\bot-env\Scripts\activate.ps1`
 then install the packages from requirements.txt as such
 `pip install -r /path/to/requirements.txt`
+
+## To get the Visual studio noticing your WorkSpace
+
+Follow the directions on the link below 
+https://code.visualstudio.com/docs/python/environments#_select-and-activate-an-environment
+
+and set the path to
+
+`..\bot-env\Scripts\python.exe`
+
 
 # EXTRA
 Review progress via the Trello board
