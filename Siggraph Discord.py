@@ -5,7 +5,10 @@ from emoji import emojize
 
 
 # Resource: https://realpython.com/how-to-make-a-discord-bot-python/
-TOKEN = "ODE5MjA2NzQ4MDYxMTcxNzE0.YEjPvA.x-6BuQMpS0AcVK2fQnhP5DjBi20"
+TOKEN = "ODE5MjA2NzQ4MDYxMTcxNzE0.YEjPvA.x-6BuQMpS0AcVK2fQnhP5DjBi20" #test server
+#TOKEN = "ODY1OTkwMDIwNDQ3OTkzODU2.YPMCDg.au17CS44PLq5jDym6E95CIB89YQ" #prod server
+#TOKEN = "ODY2MDcxMDY5MDQ2ODY1OTIw.YPNNiQ.TcrJXrHbgcNYyRgg63Vmv70c5fE" #prod server #2
+
 
 # Bot life#4006
 # ODU2ODg4MjAwMzk1NjIwMzk1.YNHlUw.9Ugaav95V1rtmswvU_E3eSjyWrw
@@ -19,8 +22,8 @@ intents.members = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 # This is the ID for Test_S2021 (the server)
-guild_id = 779464282878115880
-
+guild_id = 779464282878115880 #test server
+#guild_id = 852529598246944778 #prod server
 
 @bot.event
 async def on_ready():
@@ -59,14 +62,16 @@ async def purge(ctx):
     if len(channels_in_guild) > 0:
         for channel in channels_in_guild:
             print(channel.name)
-            await channel.delete()
+            if ("welcome-page" in channel.name):
+                print("Skipping Welcome Page")
+            else:
+                await channel.delete()
     await ctx.send('All channels and categories are gone!!!')
-
 
 # Read from CSV
 @bot.command(name='create_from_CSV', description='create channels and categories from CSV', brief='starts the new world ')
 async def createFromCSV(ctx):
-    session_file = "..\s2021_sessions_2021_6_24 - s2021_sessions_2021_6_24.csv"
+    session_file = "..\s2021_sessions_2021_7_16 - s2021_sessions_2021_7_16.csv"
     df = pd.read_csv(session_file)
     categories = {}
     for event_type in df["Category"].unique():
@@ -75,7 +80,7 @@ async def createFromCSV(ctx):
             categories[event_type] = category
     await ctx.send('created all the categories!')
 
-    df["Reduced_sessionTitle"] = df['Session Title'].str.strip().str[:20]
+    df["Reduced_sessionTitle"] = df['Session Title'].str.strip().str[:100]
     # This Format : https://discord.com/channels/779464282878115880/854343504058384424
     df["Channel Link"] = ""
     for index, row in df.iterrows():
@@ -87,7 +92,7 @@ async def createFromCSV(ctx):
             else:
                 topic_to_set = "No Specific Topic set"
         else:
-            topic_to_set = str(row["Topic"]) + "\n"+str(row["Hubb Link"])
+            topic_to_set = str(row["Topic"]) + "\n" #+str(row["Hubb Link"])
 
         if (not isinstance(row['Category'], str)) or (len(categories[row['Category']].channels) < 50):
             # TODO: check for empty catagories
@@ -125,10 +130,14 @@ async def createInviteLinks(ctx, *args):
     emails = pd.DataFrame(columns=['Numbers', 'Invitation links'])
     our_guild = bot.get_guild(guild_id)
     number_of_links = 10
+    channel_to_use = 0
     if ((len(args) > 0) and args[0].isdigit()):
         print(args[0])
         number_of_links = int(args[0])
-        
+    if ((len(args) > 1) and args[1].isdigit()):
+        print(args[1])
+        channel_to_use = int(args[1])
+
     emails["Numbers"] = pd.Series(range(1, number_of_links+1))
     emails["Invitation links"] = ""
     # TODO use args to parse number of emails
@@ -138,9 +147,11 @@ async def createInviteLinks(ctx, *args):
         # Reference: https://discordpy.readthedocs.io/en/latest/api.html?highlight=create_invite#discord.abc.GuildChannel.create_invite
         # ASSUMPTION: The link should not expire but is allowed to be used only once
         # Email is not needed
-        invite = await our_guild.channels[0].create_invite(max_age=0, max_uses=5)
+        print(our_guild.channels[channel_to_use])
+        invite = await our_guild.channels[channel_to_use].create_invite(max_age=0, max_uses=11)
+
         emails.at[index, "Invitation links"] = invite.url
-        print(invite.url)
+        #print(invite.url)
     emails.to_csv(email_csv, index=False)
     await ctx.send('Invitation links were created!')
 
