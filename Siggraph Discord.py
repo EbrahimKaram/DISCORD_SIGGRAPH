@@ -327,18 +327,19 @@ async def sendRoleMessages(ctx):
 
 @bot.command(name='create_role', description="creates a role '!create_role role_name1 role_name2'", brief='messages to help assign roles')
 async def createRole(ctx, *args, messages=True):
+    our_guild = bot.get_guild(guild_id)
     if (not await checkRole(ctx)):
         return
-    our_guild = bot.get_guild(guild_id)
     if len(args) > 0:
         for arg in args:
-            # TODO
-            # remove the any spaces and replace with Underscore
-            arg = arg.trim().replace(' ', '_')
-            # Check if role in roles
-            await our_guild.create_role(name=arg)
-            if messages:
-                await ctx.send(f"Created role {arg}")
+            arg = arg.strip()
+            if discord.utils.get(our_guild.roles, name=arg) == None:
+                await our_guild.create_role(name=arg)
+                if messages:
+                    await ctx.send(f"Created role {arg}")
+            else: 
+                if messages:
+                    await ctx.send(f"The role {arg} is already implemented")
 
 
 async def checkRole(ctx):
