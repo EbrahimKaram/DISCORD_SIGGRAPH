@@ -2,7 +2,8 @@ import discord
 import pandas as pd
 from discord.ext import commands
 import datetime as dt
-from emoji import emojize
+import pickle
+import os.path
 
 
 # Resource: https://realpython.com/how-to-make-a-discord-bot-python/
@@ -29,6 +30,10 @@ async def on_ready():
     print('Logged on as {0}!'.format(bot.user.name))
     global guild_id
     guild_id = bot.guilds[0].id
+    if(os.path.exists(message_pickle)):
+        with open(message_pickle, 'rb') as f:
+            global messages_to_monitor
+            messages_to_monitor = pickle.load(f)
     print(bot.guilds[0].name, guild_id)
 
 
@@ -285,7 +290,10 @@ async def sendToAll(ctx, *args):
     else:
         await ctx.send("You do have permisssions to use this command")
 
-messages_to_monitor = []
+
+messages_to_monitor = [870745251017535508, 870745212899717190,
+                       870745192704147507, 870744923404656740, 870745185364099143]
+message_pickle = 'message.pickle'
 
 
 @bot.command(name='send_role_messages', description="send the role messages from the csv to assign roles", brief='messages to help assign roles')
@@ -298,7 +306,8 @@ async def sendRoleMessages(ctx):
 
     welcome_channel = discord.utils.get(
         our_guild.channels, name="welcome-page")
-
+    global messages_to_monitor
+    messages_to_monitor = []
     for column in df.columns:
         message = ""
         # message += column+" Roles \n"
@@ -327,19 +336,24 @@ async def sendRoleMessages(ctx):
                                   == emoji_str, 'Role'].values[0]
             if role:
                 await createRole(ctx, role, messages=False)
+    global message_pickle
+    with open(message_pickle, 'wb') as f:
+        pickle.dump(messages_to_monitor, f)
     await ctx.send("Sent the role messages")
 
 
 @bot.event
 async def on_raw_reaction_add(payload):
     message_id = payload.message_id
-
-    print("You reacted to a message")
+    if message_id in messages_to_monitor:
+        print("We just reacted to the message we want")
 
 
 @bot.event
 async def on_raw_reaction_remove(payload):
-    print("You reacted to a message")
+    message_id = payload.message_id
+    if message_id in messages_to_monitor:
+        print("We just removed a message we want")
 
 
 @bot.command(name='create_role', description="creates a role '!create_role role_name1 role_name2'", brief='messages to help assign roles')
