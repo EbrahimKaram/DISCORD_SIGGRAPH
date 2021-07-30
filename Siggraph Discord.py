@@ -285,6 +285,8 @@ async def sendToAll(ctx, *args):
     else:
         await ctx.send("You do have permisssions to use this command")
 
+messages_to_monitor = []
+
 
 @bot.command(name='send_role_messages', description="send the role messages from the csv to assign roles", brief='messages to help assign roles')
 async def sendRoleMessages(ctx):
@@ -307,28 +309,31 @@ async def sendRoleMessages(ctx):
                 words_roles = df_temp.iloc[i].split(':')[:2]
                 if len(words_roles) > 1:
                     emojis.append(":"+words_roles[1] + ":")
-                    # emojis.append(words_roles[1])
                     message += words_roles[0] + ":"+words_roles[1] + ":" + "\n"
                 else:
                     message += df_temp.iloc[i]+"\n"
-        # TODO: do some role reactions to messaages
 
         # TODO: add bot reactions to message. Need to have an automated way to find emoji ID. So the bot can react to message
         messaage_sent = await welcome_channel.send(message)
-        # print(messaage_sent.content)
+        messages_to_monitor.append(messaage_sent)
         for emoji_str in emojis:
             # We need to make sure if emoji in list if not we can add it.
             emoji_symbol = emoji_data.loc[emoji_data['Shortcode']
                                           == emoji_str, 'Symbol'].values[0]
             if emoji_symbol:
                 await messaage_sent.add_reaction(emoji_symbol)
+
+            role = emoji_data.loc[emoji_data['Shortcode']
+                                  == emoji_str, 'Role'].values[0]
+            if role:
+                await createRole(ctx, role, messages=False)
     await ctx.send("Sent the role messages")
 
 
 @bot.command(name='create_role', description="creates a role '!create_role role_name1 role_name2'", brief='messages to help assign roles')
 async def createRole(ctx, *args, messages=True):
     our_guild = bot.get_guild(guild_id)
-    if (not await checkRole(ctx)):
+    if (not await checkRole(ctx, messages)):
         return
     if len(args) > 0:
         for arg in args:
@@ -337,12 +342,12 @@ async def createRole(ctx, *args, messages=True):
                 await our_guild.create_role(name=arg)
                 if messages:
                     await ctx.send(f"Created role {arg}")
-            else: 
+            else:
                 if messages:
                     await ctx.send(f"The role {arg} is already implemented")
 
 
-async def checkRole(ctx):
+async def checkRole(ctx, messages=True):
     # Might check for a bunch of roles to see if they work
     # Admin
     roles = ["SIGGRAPH_Chair", "Admin"]
@@ -354,10 +359,12 @@ async def checkRole(ctx):
         our_guild.members, name=ctx.message.author.name)
     # If there is role in the array that fits. we can use the command
     if(set(roles_needed) & set(member_in_question.roles)):
-        await ctx.send(f"You do have the permissions to use this command")
+        if messages:
+            await ctx.send(f"You do have the permissions to use this command")
         return True
     else:
-        await ctx.send(f"You can not use this command")
+        if messages:
+            await ctx.send(f"You can not use this command")
         return False
 
 # This is to do a sniaty check on the emoji
