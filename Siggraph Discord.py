@@ -292,13 +292,14 @@ async def sendRoleMessages(ctx):
         return
     our_guild = bot.get_guild(guild_id)
     df = pd.read_csv("..\Channels, Categories, and Roles - Roles.csv")
+    emoji_data = pd.read_excel("..\Emoji Data.xlsx")
 
     welcome_channel = discord.utils.get(
         our_guild.channels, name="welcome-page")
 
     for column in df.columns:
         message = ""
-        message += column+" Roles \n"
+        # message += column+" Roles \n"
         df_temp = df[column]
         emojis = []
         for i in range(len(df_temp)):
@@ -316,25 +317,28 @@ async def sendRoleMessages(ctx):
         messaage_sent = await welcome_channel.send(message)
         # print(messaage_sent.content)
         for emoji_str in emojis:
-            # emoji_object = discord.utils.get(our_guild.emojis, name=emoji)
-            emoji_object = discord.utils.get(our_guild.emojis, name=emoji_str)
-            # print(emoji_object)
-            # if emoji_object:
-            # if (emojize(emoji_str)):
-
-            await messaage_sent.add_reaction(emojize(emoji_str))
+            # We need to make sure if emoji in list if not we can add it.
+            emoji_symbol = emoji_data.loc[emoji_data['Shortcode']
+                                          == emoji_str, 'Symbol'].values[0]
+            if emoji_symbol:
+                await messaage_sent.add_reaction(emoji_symbol)
     await ctx.send("Sent the role messages")
 
 
 @bot.command(name='create_role', description="creates a role '!create_role role_name1 role_name2'", brief='messages to help assign roles')
-async def createRole(ctx, *args):
+async def createRole(ctx, *args, messages=True):
     if (not await checkRole(ctx)):
         return
     our_guild = bot.get_guild(guild_id)
     if len(args) > 0:
         for arg in args:
+            # TODO
+            # remove the any spaces and replace with Underscore
+            arg = arg.trim().replace(' ', '_')
+            # Check if role in roles
             await our_guild.create_role(name=arg)
-            await ctx.send(f"Created role {arg}")
+            if messages:
+                await ctx.send(f"Created role {arg}")
 
 
 async def checkRole(ctx):
@@ -356,6 +360,8 @@ async def checkRole(ctx):
         return False
 
 # This is to do a sniaty check on the emoji
+
+
 @bot.command(name='test_emoji_data', hidden=True)
 async def emojiData(ctx):
     our_guild = bot.get_guild(guild_id)
