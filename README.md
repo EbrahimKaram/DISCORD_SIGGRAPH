@@ -30,8 +30,8 @@ in CMD
 `.\bot-env\Scripts\activate.bat`
 In PowerShell
 `.\bot-env\Scripts\activate.ps1`
-then install the packages from requirements.txt as such
-`pip install -r /path/to/requirements.txt`
+then install the packages from requirements.txt as such (the below is for powershell)
+`pip install -r .\requirements.txt`
 
 ## To get the Visual studio noticing your WorkSpace
 

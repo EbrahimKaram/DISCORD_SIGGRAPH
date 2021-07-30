@@ -305,8 +305,8 @@ async def sendRoleMessages(ctx):
             if not pd.isnull(df_temp.iloc[i]):
                 words_roles = df_temp.iloc[i].split(':')[:2]
                 if len(words_roles) > 1:
-                    # emojis.append(":"+words_roles[1] + ":")
-                    emojis.append(words_roles[1])
+                    emojis.append(":"+words_roles[1] + ":")
+                    # emojis.append(words_roles[1])
                     message += words_roles[0] + ":"+words_roles[1] + ":" + "\n"
                 else:
                     message += df_temp.iloc[i]+"\n"
@@ -315,12 +315,14 @@ async def sendRoleMessages(ctx):
         # TODO: add bot reactions to message. Need to have an automated way to find emoji ID. So the bot can react to message
         messaage_sent = await welcome_channel.send(message)
         # print(messaage_sent.content)
-        for emoji in emojis:
+        for emoji_str in emojis:
             # emoji_object = discord.utils.get(our_guild.emojis, name=emoji)
-            emoji_object = discord.utils.get(our_guild.emojis, name=emoji)
+            emoji_object = discord.utils.get(our_guild.emojis, name=emoji_str)
             # print(emoji_object)
             # if emoji_object:
-            await messaage_sent.add_reaction('😄')
+            # if (emojize(emoji_str)):
+
+            await messaage_sent.add_reaction(emojize(emoji_str))
     await ctx.send("Sent the role messages")
 
 
@@ -331,8 +333,8 @@ async def createRole(ctx, *args):
     our_guild = bot.get_guild(guild_id)
     if len(args) > 0:
         for arg in args:
-           await our_guild.create_role(name=arg)
-           await ctx.send(f"Created role {arg}")
+            await our_guild.create_role(name=arg)
+            await ctx.send(f"Created role {arg}")
 
 
 async def checkRole(ctx):
@@ -352,6 +354,21 @@ async def checkRole(ctx):
     else:
         await ctx.send(f"You can not use this command")
         return False
+
+
+@bot.command(name='test_emoji_data', hidden=True)
+async def emojiData(ctx):
+    our_guild = bot.get_guild(guild_id)
+    emoji_data = pd.read_excel("..\Emoji Data.xlsx")
+    for index, row in emoji_data.iterrows():
+        print(row['Shortcode'])
+        if(":" in row['Symbol']):
+            pass
+        else:
+            message = await ctx.send(row['Symbol'])
+            emoji_data.at[index, "Invitation links"] = message.content
+            await message.add_reaction(row['Symbol'])
+    emoji_data.to_excel("..\Emoji Data.xlsx", index=False)
 # Commands don't work when this is set
 # @bot.event
 # async def on_message(message):
