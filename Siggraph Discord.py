@@ -324,12 +324,23 @@ async def sendRoleMessages(ctx):
     await ctx.send("Sent the role messages")
 
 
+@bot.command(name='create_role', description="creates a role '!create_role role_name1 role_name2'", brief='messages to help assign roles')
+async def createRole(ctx, *args):
+    if (not await checkRole(ctx)):
+        return
+    our_guild = bot.get_guild(guild_id)
+    if len(args) > 0:
+        for arg in args:
+           await our_guild.create_role(name=arg)
+           await ctx.send(f"Created role {arg}")
+
+
 async def checkRole(ctx):
     # Might check for a bunch of roles to see if they work
     # Admin
-    roles=["SIGGRAPH_Chair","Admin"]
+    roles = ["SIGGRAPH_Chair", "Admin"]
     our_guild = bot.get_guild(guild_id)
-    roles_needed=[]
+    roles_needed = []
     for role in roles:
         roles_needed.append(discord.utils.get(our_guild.roles, name=role))
     member_in_question = discord.utils.get(
