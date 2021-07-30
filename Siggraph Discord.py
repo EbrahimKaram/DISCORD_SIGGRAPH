@@ -5,8 +5,8 @@ from emoji import emojize
 
 
 # Resource: https://realpython.com/how-to-make-a-discord-bot-python/
-TOKEN = "ODE5MjA2NzQ4MDYxMTcxNzE0.YEjPvA.x-6BuQMpS0AcVK2fQnhP5DjBi20" #test server
-#TOKEN = "ODY1OTkwMDIwNDQ3OTkzODU2.YPMCDg.au17CS44PLq5jDym6E95CIB89YQ" #prod server
+#TOKEN = "ODE5MjA2NzQ4MDYxMTcxNzE0.YEjPvA.x-6BuQMpS0AcVK2fQnhP5DjBi20" #test server
+TOKEN = "ODY1OTkwMDIwNDQ3OTkzODU2.YPMCDg.au17CS44PLq5jDym6E95CIB89YQ" #prod server
 #TOKEN = "ODY2MDcxMDY5MDQ2ODY1OTIw.YPNNiQ.TcrJXrHbgcNYyRgg63Vmv70c5fE" #prod server #2
 
 
@@ -22,8 +22,8 @@ intents.members = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 # This is the ID for Test_S2021 (the server)
-guild_id = 779464282878115880 #test server
-#guild_id = 852529598246944778 #prod server
+#guild_id = 779464282878115880 #test server
+guild_id = 852529598246944778 #prod server
 
 @bot.event
 async def on_ready():
@@ -71,7 +71,7 @@ async def purge(ctx):
 # Read from CSV
 @bot.command(name='create_from_CSV', description='create channels and categories from CSV', brief='starts the new world ')
 async def createFromCSV(ctx):
-    session_file = "..\s2021_sessions_2021_7_16 - s2021_sessions_2021_7_16.csv"
+    session_file = "..\s2021_sessions_7_16.csv"
     df = pd.read_csv(session_file)
     categories = {}
     for event_type in df["Category"].unique():
@@ -143,9 +143,9 @@ async def createInviteLinks(ctx, *args):
     # TODO use args to parse number of emails
     for index, row in emails.iterrows():
         print(row['Numbers'])
-        # TODO: set the expiration time for the link to be
+        # Expiration should be never
         # Reference: https://discordpy.readthedocs.io/en/latest/api.html?highlight=create_invite#discord.abc.GuildChannel.create_invite
-        # ASSUMPTION: The link should not expire but is allowed to be used only once
+        # ASSUMPTION: The link should not expire but is allowed to be used only once . <-- THis changed and now we have 11 uses per link
         # Email is not needed
         print(our_guild.channels[channel_to_use])
         invite = await our_guild.channels[channel_to_use].create_invite(max_age=0, max_uses=11)
@@ -225,7 +225,7 @@ async def exportChannles(ctx):
 @bot.command(name='help_moderator', description='Send help to the support channel', brief='ask for help in the support channel')
 async def askForHelp(ctx, args):
     our_guild = bot.get_guild(guild_id)
-    support_channel = discord.utils.get(our_guild.channels, name="support")
+    support_channel = discord.utils.get(our_guild.channels, name="moderators-hidden")
     await support_channel.send(f"Hello support {ctx.message.author} said: {args}")
     await ctx.send("Your message was forwarded to support")
 
@@ -245,9 +245,16 @@ async def sendAll(ctx, args):
     else:
         await ctx.send("You do have permisssions to use this command")
 
+# !send_message channel "the message to send" 
+
+@bot.command(name='send_message', description="Updates the guidelines message", brief='Guidelines message')
+async def updateGuideline(ctx, *args):
+    our_guild = bot.get_guild(guild_id)
+    channel = discord.utils.get(
+        our_guild.channels, name=args[0])
+    await channel.send(args[1])
+
 # !send_to_category "the message to send" category
-
-
 @bot.command(name='send_to_category', description="send Message to all channels in catergory example:" +
              " '!send_to_category \"the message to send\" category' ", brief='megaphone to category')
 async def sendToAll(ctx, *args):
