@@ -344,16 +344,36 @@ async def sendRoleMessages(ctx):
 
 @bot.event
 async def on_raw_reaction_add(payload):
+    our_guild = bot.get_guild(guild_id)
     message_id = payload.message_id
     if message_id in messages_to_monitor:
         print("We just reacted to the message we want")
+        member = discord.utils.get(
+            our_guild.members,id=payload.user_id )
+        emoji_data = pd.read_excel("..\Emoji Data.xlsx")
+        role_name = emoji_data.loc[emoji_data['Symbol']
+                                   == payload.emoji.name, 'Role'].values[0]
+        role_to_add = discord.utils.get(our_guild.roles, name=role_name)
+        if member and role_to_add:
+            await member.add_roles(role_to_add)
+        print(payload.emoji)
 
 
 @bot.event
 async def on_raw_reaction_remove(payload):
+    our_guild = bot.get_guild(guild_id)
     message_id = payload.message_id
     if message_id in messages_to_monitor:
         print("We just removed a message we want")
+        member = discord.utils.get(
+            our_guild.members,id=payload.user_id )
+        emoji_data = pd.read_excel("..\Emoji Data.xlsx")
+        role_name = emoji_data.loc[emoji_data['Symbol']
+                                   == payload.emoji.name, 'Role'].values[0]
+        role_to_remove = discord.utils.get(our_guild.roles, name=role_name)
+        if member and role_to_remove:
+            await member.remove_roles(role_to_remove)
+        print(payload.emoji)
 
 
 @bot.command(name='create_role', description="creates a role '!create_role role_name1 role_name2'", brief='messages to help assign roles')
