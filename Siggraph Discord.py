@@ -315,7 +315,7 @@ async def sendRoleMessages(ctx):
 
         # TODO: add bot reactions to message. Need to have an automated way to find emoji ID. So the bot can react to message
         messaage_sent = await welcome_channel.send(message)
-        messages_to_monitor.append(messaage_sent)
+        messages_to_monitor.append(messaage_sent.id)
         for emoji_str in emojis:
             # We need to make sure if emoji in list if not we can add it.
             emoji_symbol = emoji_data.loc[emoji_data['Shortcode']
@@ -328,6 +328,18 @@ async def sendRoleMessages(ctx):
             if role:
                 await createRole(ctx, role, messages=False)
     await ctx.send("Sent the role messages")
+
+
+@bot.event
+async def on_raw_reaction_add(payload):
+    message_id = payload.message_id
+
+    print("You reacted to a message")
+
+
+@bot.event
+async def on_raw_reaction_remove(payload):
+    print("You reacted to a message")
 
 
 @bot.command(name='create_role', description="creates a role '!create_role role_name1 role_name2'", brief='messages to help assign roles')
