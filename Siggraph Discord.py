@@ -355,20 +355,21 @@ async def checkRole(ctx):
         await ctx.send(f"You can not use this command")
         return False
 
-
+# This is to do a sniaty check on the emoji
 @bot.command(name='test_emoji_data', hidden=True)
 async def emojiData(ctx):
     our_guild = bot.get_guild(guild_id)
     emoji_data = pd.read_excel("..\Emoji Data.xlsx")
     for index, row in emoji_data.iterrows():
-        print(row['Shortcode'])
         if(":" in row['Symbol']):
+            # emoji = bot.get_emoji(row["Discord_ID"])
+            # message = await ctx.send(row['Shortcode'])
+            # await message.add_reaction("<"+row['Shortcode']+row["Discord_ID"]+">")
             pass
         else:
             message = await ctx.send(row['Symbol'])
-            emoji_data.at[index, "Invitation links"] = message.content
             await message.add_reaction(row['Symbol'])
-    emoji_data.to_excel("..\Emoji Data.xlsx", index=False)
+    # emoji_data.to_excel("..\Emoji Data.xlsx", index=False)
 # Commands don't work when this is set
 # @bot.event
 # async def on_message(message):
