@@ -1,6 +1,7 @@
 import discord
 import pandas as pd
 from discord.ext import commands
+import datetime as dt
 from emoji import emojize
 
 
@@ -36,6 +37,8 @@ async def on_ready():
 
 @bot.command(name='create_channel', description='Create text channel Channel here', brief="Let There be Channels")
 async def create_channel(ctx, *args):
+    if (not await checkRole(ctx)):
+        return
     if len(args) > 0:
         for arg in args:
             await bot.guilds[0].create_text_channel(arg)
@@ -57,6 +60,8 @@ async def ping(ctx):
 
 @bot.command(name='purge', description='delete every channel here in this system', brief='DELETE EVERYTHING')
 async def purge(ctx):
+    if (not await checkRole(ctx)):
+        return
     our_guild = bot.get_guild(guild_id)
     channels_in_guild = await our_guild.fetch_channels()
     if len(channels_in_guild) > 0:
@@ -71,6 +76,8 @@ async def purge(ctx):
 # Read from CSV
 @bot.command(name='create_from_CSV', description='create channels and categories from CSV', brief='starts the new world ')
 async def createFromCSV(ctx):
+    if (not await checkRole(ctx)):
+        return
     session_file = "..\s2021_sessions_7_16.csv"
     df = pd.read_csv(session_file)
     categories = {}
@@ -124,8 +131,10 @@ async def createFromCSV(ctx):
     await ctx.send('All channels and categories are created from CSV!!!')
 
 
-@ bot.command(name='create_links', description='create links for all the participants', brief='create invite links')
+@ bot.command(name='create_links', description='create links for all the participants ex:\'!create_links 10 \' ', brief='create invite links ')
 async def createInviteLinks(ctx, *args):
+    if (not await checkRole(ctx)):
+        return
     email_csv = "..\Invitation_links.csv"
     emails = pd.DataFrame(columns=['Numbers', 'Invitation links'])
     our_guild = bot.get_guild(guild_id)
@@ -141,6 +150,13 @@ async def createInviteLinks(ctx, *args):
     emails["Numbers"] = pd.Series(range(1, number_of_links+1))
     emails["Invitation links"] = ""
     # TODO use args to parse number of emails
+
+    # TODO: set the expiration time for the link to. THis is set in seconds for max_age.
+    # They need to exprire on October 29,2021 (10/29/2021). Max age we can set is 604800 which is 7 days.
+    # No expiration set
+    seconds_to_expire = int((
+        dt.datetime(year=2021, month=10, day=29)-dt.datetime.now()).total_seconds())
+    print("Links will expire in ", seconds_to_expire, " seconds.")
     for index, row in emails.iterrows():
         print(row['Numbers'])
         # Expiration should be never
@@ -158,12 +174,16 @@ async def createInviteLinks(ctx, *args):
 
 @bot.command(name='reset', description='delete everything and create again from a csv', brief='restart the world')
 async def resetWorld(ctx):
+    if (not await checkRole(ctx)):
+        return
     await purge(ctx)
     await createFromCSV(ctx)
 
 
 @bot.command(name='members', description='Gets you the members in the guild', brief='Who is in the server')
 async def getMembers(ctx):
+    if (not await checkRole(ctx)):
+        return
     our_guild = bot.get_guild(guild_id)
     # There are 16 members
     print("How many members are in this server", our_guild.member_count)
@@ -190,6 +210,8 @@ async def getMembers(ctx):
 
 @bot.command(name='assign_roles', description='Assing the roles to the different members', brief='Tell who does what')
 async def roleAssigned(ctx):
+    if (not await checkRole(ctx)):
+        return
     df = pd.read_csv("..\Role Assignment.csv")
     df[["Name", "delim"]] = df["User name"].str.split("#", expand=True)
     our_guild = bot.get_guild(guild_id)
@@ -206,6 +228,8 @@ async def roleAssigned(ctx):
 
 @bot.command(name='export_channels', description='export channel links, names, and categories to server', brief='export channel links to csv')
 async def exportChannles(ctx):
+    if (not await checkRole(ctx)):
+        return
     our_guild = bot.get_guild(guild_id)
     channels_in_guild = await our_guild.fetch_channels()
     df = pd.DataFrame(columns=('Channel Name', 'Category', 'Type', 'link'))
@@ -280,18 +304,23 @@ async def sendToAll(ctx, *args):
     else:
         await ctx.send("You do have permisssions to use this command")
 
+messages_to_monitor = []
+
 
 @bot.command(name='send_role_messages', description="send the role messages from the csv to assign roles", brief='messages to help assign roles')
 async def sendRoleMessages(ctx):
+    if (not await checkRole(ctx)):
+        return
     our_guild = bot.get_guild(guild_id)
     df = pd.read_csv("..\Channels, Categories, and Roles - Roles.csv")
+    emoji_data = pd.read_excel("..\Emoji Data.xlsx")
 
     welcome_channel = discord.utils.get(
         our_guild.channels, name="welcome-page")
 
     for column in df.columns:
         message = ""
-        message += column+" Roles \n"
+        # message += column+" Roles \n"
         df_temp = df[column]
         emojis = []
         for i in range(len(df_temp)):
@@ -302,17 +331,90 @@ async def sendRoleMessages(ctx):
                     message += words_roles[0] + ":"+words_roles[1] + ":" + "\n"
                 else:
                     message += df_temp.iloc[i]+"\n"
-        # TODO: do some role reactions to messaages
 
         # TODO: add bot reactions to message. Need to have an automated way to find emoji ID. So the bot can react to message
         messaage_sent = await welcome_channel.send(message)
-        # for emoji in emojis:
-        #     # emoji_object = discord.utils.get(our_guild.emojis, name=emoji)
-        #     emoji_object = emojize(emoji)
-        #     print(emoji_object)
-        #     await messaage_sent.add_reaction(emoji_object)
+        messages_to_monitor.append(messaage_sent.id)
+        for emoji_str in emojis:
+            # We need to make sure if emoji in list if not we can add it.
+            emoji_symbol = emoji_data.loc[emoji_data['Shortcode']
+                                          == emoji_str, 'Symbol'].values[0]
+            if emoji_symbol:
+                await messaage_sent.add_reaction(emoji_symbol)
+
+            role = emoji_data.loc[emoji_data['Shortcode']
+                                  == emoji_str, 'Role'].values[0]
+            if role:
+                await createRole(ctx, role, messages=False)
     await ctx.send("Sent the role messages")
 
+
+@bot.event
+async def on_raw_reaction_add(payload):
+    message_id = payload.message_id
+
+    print("You reacted to a message")
+
+
+@bot.event
+async def on_raw_reaction_remove(payload):
+    print("You reacted to a message")
+
+
+@bot.command(name='create_role', description="creates a role '!create_role role_name1 role_name2'", brief='messages to help assign roles')
+async def createRole(ctx, *args, messages=True):
+    our_guild = bot.get_guild(guild_id)
+    if (not await checkRole(ctx, messages)):
+        return
+    if len(args) > 0:
+        for arg in args:
+            arg = arg.strip()
+            if discord.utils.get(our_guild.roles, name=arg) == None:
+                await our_guild.create_role(name=arg)
+                if messages:
+                    await ctx.send(f"Created role {arg}")
+            else:
+                if messages:
+                    await ctx.send(f"The role {arg} is already implemented")
+
+
+async def checkRole(ctx, messages=True):
+    # Might check for a bunch of roles to see if they work
+    # Admin
+    roles = ["SIGGRAPH_Chair", "Admin"]
+    our_guild = bot.get_guild(guild_id)
+    roles_needed = []
+    for role in roles:
+        roles_needed.append(discord.utils.get(our_guild.roles, name=role))
+    member_in_question = discord.utils.get(
+        our_guild.members, name=ctx.message.author.name)
+    # If there is role in the array that fits. we can use the command
+    if(set(roles_needed) & set(member_in_question.roles)):
+        if messages:
+            await ctx.send(f"You do have the permissions to use this command")
+        return True
+    else:
+        if messages:
+            await ctx.send(f"You can not use this command")
+        return False
+
+# This is to do a sniaty check on the emoji
+
+
+@bot.command(name='test_emoji_data', hidden=True)
+async def emojiData(ctx):
+    our_guild = bot.get_guild(guild_id)
+    emoji_data = pd.read_excel("..\Emoji Data.xlsx")
+    for index, row in emoji_data.iterrows():
+        if(":" in row['Symbol']):
+            # emoji = bot.get_emoji(row["Discord_ID"])
+            # message = await ctx.send(row['Shortcode'])
+            # await message.add_reaction("<"+row['Shortcode']+row["Discord_ID"]+">")
+            pass
+        else:
+            message = await ctx.send(row['Symbol'])
+            await message.add_reaction(row['Symbol'])
+    # emoji_data.to_excel("..\Emoji Data.xlsx", index=False)
 # Commands don't work when this is set
 # @bot.event
 # async def on_message(message):
