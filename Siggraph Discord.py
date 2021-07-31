@@ -7,8 +7,8 @@ import os.path
 
 
 # Resource: https://realpython.com/how-to-make-a-discord-bot-python/
-TOKEN = "ODE5MjA2NzQ4MDYxMTcxNzE0.YEjPvA.x-6BuQMpS0AcVK2fQnhP5DjBi20" #test server
-# TOKEN = "ODY1OTkwMDIwNDQ3OTkzODU2.YPMCDg.au17CS44PLq5jDym6E95CIB89YQ" #prod server
+# TOKEN = "ODE5MjA2NzQ4MDYxMTcxNzE0.YEjPvA.x-6BuQMpS0AcVK2fQnhP5DjBi20" #test server
+TOKEN = "ODY1OTkwMDIwNDQ3OTkzODU2.YPMCDg.au17CS44PLq5jDym6E95CIB89YQ" #prod server
 #TOKEN = "ODY2MDcxMDY5MDQ2ODY1OTIw.YPNNiQ.TcrJXrHbgcNYyRgg63Vmv70c5fE" #prod server #2
 
 
@@ -24,8 +24,8 @@ intents.members = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 # This is the ID for Test_S2021 (the server)
-guild_id = 779464282878115880 #test server
-# guild_id = 852529598246944778 #prod server
+# guild_id = 779464282878115880 #test server
+guild_id = 852529598246944778 #prod server
 
 @bot.event
 async def on_ready():
