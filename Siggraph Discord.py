@@ -83,7 +83,8 @@ async def purge(ctx):
 async def createFromCSV(ctx):
     if (not await checkRole(ctx)):
         return
-    session_file = "..\s2021_sessions_7_16.csv"
+    session_file = "..\s2021_sessions_7_16.csv" #prod csv
+    # session_file = "..\s2021_sessions_2021_6_24 - s2021_sessions_2021_6_24.csv" #test csv
     df = pd.read_csv(session_file)
     categories = {}
     for event_type in df["Category"].unique():
@@ -367,6 +368,7 @@ async def on_raw_reaction_add(payload):
     message_id = payload.message_id
     if message_id in messages_to_monitor:
         print("We just reacted to the message we want")
+        print(payload.emoji)
         member = discord.utils.get(
             our_guild.members,id=payload.user_id )
         emoji_data = pd.read_excel("..\Emoji Data.xlsx")
@@ -375,7 +377,6 @@ async def on_raw_reaction_add(payload):
         role_to_add = discord.utils.get(our_guild.roles, name=role_name)
         if member and role_to_add:
             await member.add_roles(role_to_add)
-        print(payload.emoji)
 
 
 @bot.event
@@ -384,6 +385,7 @@ async def on_raw_reaction_remove(payload):
     message_id = payload.message_id
     if message_id in messages_to_monitor:
         print("We just removed a message we want")
+        print(payload.emoji)
         member = discord.utils.get(
             our_guild.members,id=payload.user_id )
         emoji_data = pd.read_excel("..\Emoji Data.xlsx")
@@ -395,7 +397,7 @@ async def on_raw_reaction_remove(payload):
         print(payload.emoji)
 
 
-@bot.command(name='create_role', description="creates a role '!create_role role_name1 role_name2'", brief='messages to help assign roles')
+@bot.command(name='create_role', description="creates a role '!create_role role_name1 role_name2'", brief='creates a role through command')
 async def createRole(ctx, *args, messages=True):
     our_guild = bot.get_guild(guild_id)
     if (not await checkRole(ctx, messages)):
