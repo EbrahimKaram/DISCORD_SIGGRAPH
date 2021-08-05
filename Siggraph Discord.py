@@ -7,9 +7,9 @@ import os.path
 
 
 # Resource: https://realpython.com/how-to-make-a-discord-bot-python/
-TOKEN = "ODE5MjA2NzQ4MDYxMTcxNzE0.YEjPvA.x-6BuQMpS0AcVK2fQnhP5DjBi20" #test server
+TOKEN = "ODE5MjA2NzQ4MDYxMTcxNzE0.YEjPvA.x-6BuQMpS0AcVK2fQnhP5DjBi20"  # test server
 # TOKEN = "ODY1OTkwMDIwNDQ3OTkzODU2.YPMCDg.au17CS44PLq5jDym6E95CIB89YQ" #prod server
-#TOKEN = "ODY2MDcxMDY5MDQ2ODY1OTIw.YPNNiQ.TcrJXrHbgcNYyRgg63Vmv70c5fE" #prod server #2
+# TOKEN = "ODY2MDcxMDY5MDQ2ODY1OTIw.YPNNiQ.TcrJXrHbgcNYyRgg63Vmv70c5fE" #prod server #2
 
 
 # Bot life#4006
@@ -24,8 +24,14 @@ intents.members = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 # This is the ID for Test_S2021 (the server)
-guild_id = 779464282878115880 #test server
+guild_id = 779464282878115880  # test server
 # guild_id = 852529598246944778 #prod server
+
+
+messages_to_monitor = []
+message_pickle = 'messages_test.pickle'  # Test server
+# message_pickle = 'messages_production.pickle'  #prod server
+
 
 @bot.event
 async def on_ready():
@@ -79,11 +85,13 @@ async def purge(ctx):
     await ctx.send('All channels and categories are gone!!!')
 
 # Read from CSV
+
+
 @bot.command(name='create_from_CSV', description='create channels and categories from CSV', brief='starts the new world ')
 async def createFromCSV(ctx):
     if (not await checkRole(ctx)):
         return
-    session_file = "..\s2021_sessions_7_16.csv" #prod csv
+    session_file = "..\s2021_sessions_7_16.csv"  # prod csv
     # session_file = "..\s2021_sessions_2021_6_24 - s2021_sessions_2021_6_24.csv" #test csv
     df = pd.read_csv(session_file)
     categories = {}
@@ -105,7 +113,7 @@ async def createFromCSV(ctx):
             else:
                 topic_to_set = "No Specific Topic set"
         else:
-            topic_to_set = str(row["Topic"]) + "\n" #+str(row["Hubb Link"])
+            topic_to_set = str(row["Topic"]) + "\n"  # +str(row["Hubb Link"])
 
         if (not isinstance(row['Category'], str)) or (len(categories[row['Category']].channels) < 50):
             # TODO: check for empty catagories
@@ -173,7 +181,7 @@ async def createInviteLinks(ctx, *args):
         invite = await our_guild.channels[channel_to_use].create_invite(max_age=0, max_uses=11)
 
         emails.at[index, "Invitation links"] = invite.url
-        #print(invite.url)
+        # print(invite.url)
     emails.to_csv(email_csv, index=False)
     await ctx.send('Invitation links were created!')
 
@@ -255,7 +263,8 @@ async def exportChannles(ctx):
 @bot.command(name='help_moderator', description='Send help to the support channel', brief='ask for help in the support channel')
 async def askForHelp(ctx, args):
     our_guild = bot.get_guild(guild_id)
-    support_channel = discord.utils.get(our_guild.channels, name="moderators-hidden")
+    support_channel = discord.utils.get(
+        our_guild.channels, name="moderators-hidden")
     await support_channel.send(f"Hello support {ctx.message.author} said: {args}")
     await ctx.send("Your message was forwarded to support")
 
@@ -275,7 +284,8 @@ async def sendAll(ctx, args):
     else:
         await ctx.send("You do have permisssions to use this command")
 
-# !send_message channel "the message to send" 
+# !send_message channel "the message to send"
+
 
 @bot.command(name='send_message', description="Updates the guidelines message", brief='Guidelines message')
 async def updateGuideline(ctx, *args):
@@ -285,6 +295,8 @@ async def updateGuideline(ctx, *args):
     await channel.send(args[1])
 
 # !send_to_category "the message to send" category
+
+
 @bot.command(name='send_to_category', description="send Message to all channels in catergory example:" +
              " '!send_to_category \"the message to send\" category' ", brief='megaphone to category')
 async def sendToAll(ctx, *args):
@@ -309,11 +321,6 @@ async def sendToAll(ctx, *args):
                 ctx.send(f"{category_asked} is not a valid category")
     else:
         await ctx.send("You do have permisssions to use this command")
-
-
-messages_to_monitor = [870745251017535508, 870745212899717190,
-                       870745192704147507, 870744923404656740, 870745185364099143]
-message_pickle = 'message.pickle'
 
 
 @bot.command(name='send_role_messages', description="send the role messages from the csv to assign roles", brief='messages to help assign roles')
@@ -362,6 +369,55 @@ async def sendRoleMessages(ctx):
     await ctx.send("Sent the role messages")
 
 
+@bot.command(name='edit_role_messages', description="edit the role messages that were already sent", brief='edit the message to help assign roles')
+async def editRoleMessages(ctx):
+    if (not await checkRole(ctx)):
+        return
+    our_guild = bot.get_guild(guild_id)
+    welcome_channel = discord.utils.get(
+        our_guild.channels, name="welcome-page")
+    df = pd.read_csv("..\Channels, Categories, and Roles - Roles.csv")
+    emoji_data = pd.read_excel("..\Emoji Data.xlsx")
+
+    for column in df.columns:
+        message_tosend = ""
+        df_temp = df[column]
+        emojis = []
+        for i in range(len(df_temp)):
+            if not pd.isnull(df_temp.iloc[i]):
+                words_roles = df_temp.iloc[i].split(':')[:2]
+                if len(words_roles) > 1:
+                    emojis.append(":"+words_roles[1] + ":")
+                    message_tosend += words_roles[0] + \
+                        ":"+words_roles[1] + ":" + "\n"
+                else:
+                    message_tosend += df_temp.iloc[i]+"\n"
+        message = None
+        for message_id in messages_to_monitor:
+            # print(message_id)
+            message = await welcome_channel.fetch_message(message_id)
+            # print(message.content)
+            if message.content[:85] in message_tosend:
+                break
+        if message_tosend == message.content:
+            # if the message content is the same as teh new content, we can just ignore it
+            break
+
+        await message.edit(content=message_tosend)
+        for emoji_str in emojis:
+            # We need to make sure if emoji in list if not we can add it.
+            emoji_symbol = emoji_data.loc[emoji_data['Shortcode']
+                                          == emoji_str, 'Symbol'].values[0]
+            if emoji_symbol:
+                await message.add_reaction(emoji_symbol)
+
+            role = emoji_data.loc[emoji_data['Shortcode']
+                                  == emoji_str, 'Role'].values[0]
+            if role:
+                await createRole(ctx, role, messages=False)
+    await ctx.send("Messages have been edited")
+
+
 @bot.event
 async def on_raw_reaction_add(payload):
     our_guild = bot.get_guild(guild_id)
@@ -370,8 +426,11 @@ async def on_raw_reaction_add(payload):
         print("We just reacted to the message we want")
         print(payload.emoji)
         member = discord.utils.get(
-            our_guild.members,id=payload.user_id )
+            our_guild.members, id=payload.user_id)
         emoji_data = pd.read_excel("..\Emoji Data.xlsx")
+        if payload.emoji.name not in emoji_data['Symbol'].unique():
+            print(payload.emoji.name +" is not in our list")
+            return
         role_name = emoji_data.loc[emoji_data['Symbol']
                                    == payload.emoji.name, 'Role'].values[0]
         role_to_add = discord.utils.get(our_guild.roles, name=role_name)
@@ -387,8 +446,11 @@ async def on_raw_reaction_remove(payload):
         print("We just removed a message we want")
         print(payload.emoji)
         member = discord.utils.get(
-            our_guild.members,id=payload.user_id )
+            our_guild.members, id=payload.user_id)
         emoji_data = pd.read_excel("..\Emoji Data.xlsx")
+        if payload.emoji.name not in emoji_data['Symbol'].unique():
+            print(payload.emoji.name +" is not in our list")
+            return
         role_name = emoji_data.loc[emoji_data['Symbol']
                                    == payload.emoji.name, 'Role'].values[0]
         role_to_remove = discord.utils.get(our_guild.roles, name=role_name)
