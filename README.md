@@ -45,9 +45,9 @@ and set the path to
 # Auth Key
 I have my auth Keys stored in a `constants.py`
 This is to keep them private and not have them publicly shown on the repo.
-Please NOTE that `constants.py` is not stored on the git and is part of the `.gitignore` file. 
+Please NOTE that `constants.py` is not stored on the git and is part of the `.gitignore` file.
 
-In case senstive data was added to repo,follow the instructions in the link below from github
+In case sensitive data was added to repo, follow the instructions in the link below from GitHub
 https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository
 
 
