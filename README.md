@@ -42,6 +42,13 @@ and set the path to
 
 `..\bot-env\Scripts\python.exe`
 
+# Auth Key
+I have my auth Keys stored in a `constants.py`
+This is to keep them private and not have them . 
+
+In case senstive data was added to repo,follow the instructions in the link below from github
+https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository
+
 
 # EXTRA
 Review progress via the Trello board

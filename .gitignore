@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# ignore the file with private keys
+constants.py
+
 # ignore the bot env folder
 bot-env/
 
